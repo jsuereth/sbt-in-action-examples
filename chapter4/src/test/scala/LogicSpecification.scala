@@ -15,11 +15,11 @@ object LogicSpecification extends Properties("Logic") {
     attributes <- Gen.containerOf[Set,String](Gen.alphaStr)
   } yield BuyerPreferences(attributes))
 
-  property("matchLiklihood") = forAll(genKitten, genBuyerPreferences)((a: Kitten, b: BuyerPreferences) => {
+  property("matchLikelihood") = forAll(genKitten, genBuyerPreferences)((a: Kitten, b: BuyerPreferences) => {
     if (b.attributes.size == 0) true
     else {
       val num = b.attributes.toList.map{x => if (a.attributes.contains(x)) 1.0 else 0.0}.sum
-      num / b.attributes.size - Logic.matchLiklihood(a, b) < 0.001
+      num / b.attributes.size - Logic.matchLikelihood(a, b) < 0.001
     }
   })
 }

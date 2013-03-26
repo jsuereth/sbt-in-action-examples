@@ -1,6 +1,6 @@
 object Logic {
-  /** Determines the match liklihood and returns % match. */
-  def matchLiklihood(kitten: Kitten, buyer: BuyerPreferences): Double = {
+  /** Determines the match likelihood and returns % match. */
+  def matchLikelihood(kitten: Kitten, buyer: BuyerPreferences): Double = {
     val matches = buyer.attributes map { attribute => 
       kitten.attributes contains attribute
     }
