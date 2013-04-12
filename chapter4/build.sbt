@@ -2,7 +2,6 @@ name := "used-kittens"
 
 version := "1.0"
 
-
 // specs2
 
 libraryDependencies += "org.specs2" % "specs2_2.10" % "1.12.3" % "test"
@@ -11,10 +10,9 @@ libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "test"
                             
 testOptions += Tests.Argument(TestFrameworks.Specs2, "html")
 
-javaOptions in Test += "-Dspecs2.outDir=" + target.value + "/generated/test-reports"
+javaOptions in Test += "-Dspecs2.outDir=" + (target.value / "generated/test-reports").getAbsolutePath
 
 fork in Test := true
-
 
 // junit
 
@@ -24,12 +22,11 @@ libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.usedkittens.sbt.JUnitListener")
 
-javaOptions in Test += "-Djunit.output.file=" + target.value + "/generated/junit.html"
+javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
 
 javaHome := Some(file("/dev/java/jdk1.7.0_09"))
 
 javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6")
-
 
 // scalacheck
 
@@ -40,4 +37,13 @@ testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
 // scalatest
 
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M6-SNAP8" % "it"
+
+libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % "it"
+
+libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "it"
+
+javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=C:\\code\\sbt\\sbt-in-action-examples\\chapter4\\chromedriver.exe"
+
+testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/html-test-report")
+
