@@ -39,7 +39,7 @@ class SeleniumSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with
 
     purchaseForms() should contain ("Fred")
     purchaseForms() should contain ("Dionysus")
-    purchaseForms() should not  ("Sleepy")
+    purchaseForms() should contain ("Sleepy")
   }
 
   private def purchaseForms() = findAll(xpath("//form/input[@id='purchase']/../li")).map{_.text}.toList
