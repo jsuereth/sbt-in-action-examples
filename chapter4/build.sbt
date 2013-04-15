@@ -2,6 +2,20 @@ name := "used-kittens"
 
 version := "1.0"
 
+libraryDependencies ++= Seq(
+  "play" %% "play" % "2.1.1",
+  "eu.teamon" %% "play-navigator" % "0.4.0",
+  "org.webjars" % "jquery" % "1.9.1",
+  "play" %% "anorm" % "2.1.1",
+  "play" %% "play-jdbc" % "2.1.1",
+  "org.fusesource.scalate" %% "scalate-core" % "1.6.1"
+)
+
+resolvers ++= Seq(
+  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "teamon.eu Repo" at "http://repo.teamon.eu/"
+)
+
 // specs2
 
 libraryDependencies += "org.specs2" % "specs2_2.10" % "1.12.3" % "test"

@@ -1,0 +1,6 @@
+-@ val name: String
+- import org.usedkittens.database._
+-@ val attributes: List[Attribute]
+
+%select{:name => name}
+  = collection(attributes.sortBy(_.label), "option")
