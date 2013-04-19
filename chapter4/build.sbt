@@ -53,13 +53,15 @@ testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
 // scalatest
 
+fork in IntegrationTest := true
+
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M6-SNAP8" % "it"
 
 libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % "it"
 
 libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "it"
 
-javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=C:\\code\\sbt\\sbt-in-action-examples\\chapter4\\chromedriver.exe"
+javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources/chromedriver.exe").getAbsolutePath
 
-testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/html-test-report")
+testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
