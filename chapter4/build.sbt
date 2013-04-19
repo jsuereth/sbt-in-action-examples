@@ -2,6 +2,8 @@ name := "used-kittens"
 
 version := "1.0"
 
+// These are dependencies for Play
+
 libraryDependencies ++= Seq(
   "play" %% "play" % "2.1.1",
   "eu.teamon" %% "play-navigator" % "0.4.0",
