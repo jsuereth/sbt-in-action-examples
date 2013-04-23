@@ -9,7 +9,7 @@ import org.scalacheck.Arbitrary.arbitrary
 object LogicSpecification extends Properties("Logic") {
   val genKitten: Gen[Kitten] = for {
     attributes <- Gen.containerOf[Set,String](Gen.alphaStr)
-  } yield Kitten("id", attributes)
+  } yield Kitten(1, attributes)
 
   val genBuyerPreferences: Gen[BuyerPreferences] = (for {
     attributes <- Gen.containerOf[Set,String](Gen.alphaStr)

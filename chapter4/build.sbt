@@ -40,8 +40,6 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=
 
 javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
 
-javaHome := Some(file("/dev/java/jdk1.7.0_09"))
-
 javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6")
 
 // scalacheck
