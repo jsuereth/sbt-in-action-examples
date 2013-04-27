@@ -7,12 +7,15 @@ import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary.arbitrary
 
 object LogicSpecification extends Properties("Logic") {
+  val allAttributes = Array("Harlequin","Tortoiseshell","Siamese",
+                "Alien","Rough","Tom","Sad","Overweight")
+
   val genKitten: Gen[Kitten] = for {
-    attributes <- Gen.containerOf[Set,String](Gen.alphaStr)
+    attributes <- Gen.containerOf[Set,String](Gen.oneOf(allAttributes))
   } yield Kitten(1, attributes)
 
   val genBuyerPreferences: Gen[BuyerPreferences] = (for {
-    attributes <- Gen.containerOf[Set,String](Gen.alphaStr)
+    attributes <- Gen.containerOf[Set,String](Gen.oneOf(allAttributes))
   } yield BuyerPreferences(attributes))
 
   property("matchLikelihood") = forAll(genKitten, genBuyerPreferences)((a: Kitten, b: BuyerPreferences) => {
