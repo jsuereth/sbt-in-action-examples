@@ -17,7 +17,6 @@ import org.openqa.selenium.WebDriver
 class SeleniumSpec extends FlatSpec with ShouldMatchers with BeforeAndAfter with BeforeAndAfterAll with Chrome {
   val homePage: String = "http://localhost:9000"
 
-  
   "Home page" should "redirect to kitten list" in {
     go to "http://localhost:9000"
     currentUrl should startWith ("http://localhost:9000/kittens")

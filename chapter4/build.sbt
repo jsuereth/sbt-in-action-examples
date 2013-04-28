@@ -48,7 +48,6 @@ libraryDependencies += "org.scalacheck" % "scalacheck_2.10.0" % "1.10.0" % "test
                             
 testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
-
 // scalatest
 
 fork in IntegrationTest := true
