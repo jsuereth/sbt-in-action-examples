@@ -20,7 +20,7 @@ resolvers ++= Seq(
 
 // specs2
 
-libraryDependencies += "org.specs2" % "specs2_2.10" % "1.12.3" % "test"
+libraryDependencies += "org.specs2" %% "specs2" % "1.14" % "test"
 
 libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "test"
                             
