@@ -2,14 +2,14 @@ import sbt._
 import Keys._
 
 
-/** This helper represents how we will execute 
- * database statements.
- */
+/** This helper represents how we will execute database statements. */
 trait DatabaseHelper {
   def runStatement(sql: String, log: Logger): Boolean
   def runQuery(sql: String, log: Logger): Unit
   def tables: List[String]
 }
+
+
 class DerbyDatabaseHelper(cp: Classpath, db: File) extends DatabaseHelper {
   val derbyDriverClassname = "org.apache.derby.jdbc.EmbeddedDriver"
 
@@ -64,15 +64,21 @@ class DerbyDatabaseHelper(cp: Classpath, db: File) extends DatabaseHelper {
       val rs = stmt.executeQuery(sql)
       try {
         // Now we print the results of the query.
-        val consoleWidth = 80
         val md = rs.getMetaData
+        
+        val consoleWidth = 
+          try jline.TerminalFactory.get.getWidth - 10
+          catch {
+            case e: Exception => 80
+          }
+        val colWidth = math.max(consoleWidth / (md.getColumnCount + 1), 10)
+        log.info("Column width = " + colWidth)
         val colNums = 1 to md.getColumnCount
         // TODO - Better pretty printing
         log.info(s"-=== Query [${sql take (consoleWidth - 30)}...] results ===-")
-        val colWidth = 10
         def emptyString(len: Int): String = Stream.continually(' ').take(len).mkString
         def ensureSize(in: String): String = 
-          if(in.length < colWidth) emptyString(in.length - colWidth) + in
+          if(in.length < colWidth) emptyString(colWidth - in.length) + in
           else (in take (colWidth - 3)) + "..."
         def printRow(printer: Int => String): Unit = {
           // TODO - Limit size of columns...
