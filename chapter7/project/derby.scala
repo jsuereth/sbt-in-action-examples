@@ -4,7 +4,6 @@ import Keys._
 
 /** This helper represents how we will execute database statements. */
 trait DatabaseHelper {
-  def runStatement(sql: String, log: Logger): Boolean
   def runQuery(sql: String, log: Logger): Unit
   def tables: List[String]
 }
@@ -54,15 +53,11 @@ class DerbyDatabaseHelper(cp: Classpath, db: File) extends DatabaseHelper {
     buf.toList
   } finally rs.close()
   
-  def runStatement(sql: String, log: Logger): Boolean = withConnection { conn =>
-    conn.createStatement.execute(sql)
-  }
-  
   def runQuery(sql: String, log: Logger): Unit = withConnection { conn =>
     val stmt = conn.createStatement
     try {
-      val rs = stmt.executeQuery(sql)
-      try {
+      if(stmt.execute(sql)) try {
+        val rs = stmt.getResultSet
         // Now we print the results of the query.
         val md = rs.getMetaData
         
@@ -90,7 +85,7 @@ class DerbyDatabaseHelper(cp: Classpath, db: File) extends DatabaseHelper {
         while(rs.next) {
           printRow(rs.getString)
         }
-      } finally rs.close()
+      } finally stmt.getResultSet.close()
     } finally stmt.close()
   }
 }

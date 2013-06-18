@@ -15,7 +15,7 @@ val dbListTables = taskKey[List[String]]("")
 dbListTables := dbHelper.value.tables
 
 
-val dbQuery = inputKey[Unit]("")
+val dbQuery = inputKey[Unit]("Runs a query against the database and prints the result")
 
 val queryParser = {
   import complete.DefaultParsers._
@@ -27,14 +27,5 @@ dbQuery := {
   val db = dbHelper.value
   val log = streams.value.log
   db.runQuery(query, log)
-}
-
-val dbExecute = inputKey[Boolean]("")
-
-dbExecute := {
-  val query = queryParser.parsed
-  val db = dbHelper.value
-  val log = streams.value.log
-  db.runStatement(query, log)
 }
 
