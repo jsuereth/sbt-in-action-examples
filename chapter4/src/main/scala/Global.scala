@@ -12,7 +12,7 @@ import play.api._
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
-import org.usedkittens.database._
+import org.preownedkittens.database._
 import controllers.Scalate
 
 object Routes extends PlayNavigator {
@@ -49,11 +49,11 @@ object Application extends Controller {
   }
 
   def showSelectedKittens(id1: String, id2: String, id3: String) = {
-    import org.usedkittens.Logic._
-    val buyerPreferences = org.usedkittens.BuyerPreferences(Set(id1, id2, id3))
+    import org.preownedkittens.Logic._
+    val buyerPreferences = org.preownedkittens.BuyerPreferences(Set(id1, id2, id3))
 
     val kittensWithLikelihood = Kitten.all().map{ k =>
-      (k, matchLikelihood(org.usedkittens.Kitten(k.id, KittenAttribute.allForKitten(k).map("" + _.attributeId).toSet), buyerPreferences))
+      (k, matchLikelihood(org.preownedkittens.Kitten(k.id, KittenAttribute.allForKitten(k).map("" + _.attributeId).toSet), buyerPreferences))
     }.sortWith((d1, d2) => d1._2 > d2._2).filter(_._2 > 0.5)
 
     Ok(Scalate("app/views/selected.scaml").render('title -> "Selected kittens", 'kittens -> kittensWithLikelihood))

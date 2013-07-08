@@ -1,4 +1,4 @@
-name := "used-kittens"
+name := "preowned-kittens"
 
 version := "1.0"
 
@@ -36,7 +36,7 @@ libraryDependencies += "junit" % "junit" % "4.11" % "test"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.usedkittens.sbt.JUnitListener")
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.preownedkittens.sbt.JUnitListener")
 
 javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
 

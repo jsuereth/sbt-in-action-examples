@@ -1,4 +1,4 @@
-package com.usedkittens.sbt;
+package com.preownedkittens.sbt;
 
 import org.junit.*;
 import java.io.*;

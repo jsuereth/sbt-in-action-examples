@@ -1,4 +1,4 @@
-package org.usedkittens.database;
+package org.preownedkittens.database;
 
 import anorm._
 import anorm.SqlParser._

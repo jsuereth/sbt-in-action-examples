@@ -1,4 +1,4 @@
-package org.usedkittens;
+package org.preownedkittens;
 
 object Logic {
   /** Determines the match likelihood and returns % match. */

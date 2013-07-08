@@ -1,4 +1,4 @@
-package org.usedkittens;
+package org.preownedkittens;
 
 import org.specs2.mutable.Specification
 

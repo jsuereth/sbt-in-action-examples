@@ -1,4 +1,4 @@
-package org.usedkittens;
+package org.preownedkittens;
 
 import org.scalatest._
 import org.scalatest.matchers.ShouldMatchers

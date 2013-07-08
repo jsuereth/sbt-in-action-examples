@@ -1,4 +1,4 @@
-package org.usedkittens;
+package org.preownedkittens;
 
 import org.junit.Assert.*;
 import org.junit.*;
