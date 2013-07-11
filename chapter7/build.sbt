@@ -29,3 +29,13 @@ dbQuery := {
   db.runQuery(query, log)
 }
 
+val dbMigrationTest = inputKey[Unit]("Tests a database evolution")
+
+
+dbMigrationTest := {
+  val cmd = DatabaseMigrationTesting.parser.parsed
+  val db = dbHelper.value
+  val log = streams.value.log
+  DatabaseMigrationTesting.runCommand(cmd, db, log)
+}
+
