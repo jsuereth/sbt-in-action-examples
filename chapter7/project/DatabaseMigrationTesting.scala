@@ -5,7 +5,7 @@ import sbt.Project.Initialize
 import sbt.Keys._
 
 
-object DatabaseMigrationTesting {
+object DatabaseEvolutionTesting {
   
   sealed trait Command {
     def script: File
@@ -17,19 +17,19 @@ object DatabaseMigrationTesting {
     override def toString = s"DOWNS - ${script.getAbsolutePath}"
   }
   
-  val parser: Initialize[State => Parser[Command]] =
-    Def.setting { (state: State) =>
+  val parser: Initialize[Parser[Command]] =
+    Def.setting { 
       commandParser(baseDirectory.value / "conf/evolutions")
    }
   
   def scriptNameParser(baseDirectory: File): Parser[File] = {
-    // TODO - Is this how we want to parse script names?
+    // TODO - Make sure all script names are numbered...
     
-    val samples = IO.listFiles(baseDirectory, "*.sql")
+    val samples = IO.listFiles(baseDirectory, "\\d+.sql")
     val migrations: Set[String] = samples.map(_.getName dropRight 4).toSet
     
     val scriptName = 
-      token(NotSpace.* map (_.mkString), "migration script").examples(migrations, true)
+      token(Digit.+ map (_.mkString), "migration script").examples(migrations, true)
       
     scriptName map { name =>
       baseDirectory / s"$name.sql"  
@@ -40,17 +40,11 @@ object DatabaseMigrationTesting {
   def commandParser(baseDirectory: File): Parser[Command] = {
     val scriptName: Parser[File] = scriptNameParser(baseDirectory)    
     
-    val upBaseParser: Parser[((String, Seq[Char]), File)] =
-       "up" ~ Space ~ scriptName
-     
-    val upCmd =  
-     upBaseParser map { case ((_, _), file) =>
-      TestUp(file)
-    }
+    val upCmd: Parser[TestUp] =
+       literal("up") ~> Space ~> scriptName map TestUp.apply
     
     val downCmd =
       "down" ~> Space ~> scriptName map TestDown.apply
-      
       
     Space ~> (upCmd | downCmd)
   }
