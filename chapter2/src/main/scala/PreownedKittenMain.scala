@@ -1,3 +1,3 @@
-object UsedKittenMain extends App {
+object PreownedKittenMain extends App {
   println("Hello, sbt world!")
 }
