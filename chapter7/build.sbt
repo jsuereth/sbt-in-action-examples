@@ -33,9 +33,11 @@ val dbEvolutionTest = inputKey[Unit]("Tests a database evolution")
 
 
 dbEvolutionTest := {
-  val cmd = DatabaseEvolutionTesting.parser.parsed
-  val db = dbHelper.value
-  val log = streams.value.log
-  DatabaseEvolutionTesting.runCommand(cmd, db, log)
+  //val cmd = DatabaseEvolutionTesting.parser.parsed
+  //val db = dbHelper.value
+  //val log = streams.value.log
+  //DatabaseEvolutionTesting.runCommand(cmd, db, log)
+  val cmd = DatabaseEvolutionTesting.oldParser.parsed
+  println(cmd)
 }
 

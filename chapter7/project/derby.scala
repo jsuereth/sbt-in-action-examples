@@ -2,13 +2,6 @@ import sbt._
 import Keys._
 
 
-/** This helper represents how we will execute database statements. */
-trait DatabaseHelper {
-  def runQuery(sql: String, log: Logger): Unit
-  def tables: List[String]
-}
-
-
 class DerbyDatabaseHelper(cp: Classpath, db: File) extends DatabaseHelper {
   val derbyDriverClassname = "org.apache.derby.jdbc.EmbeddedDriver"
 

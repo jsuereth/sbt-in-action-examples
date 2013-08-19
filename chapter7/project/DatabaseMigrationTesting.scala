@@ -22,6 +22,40 @@ object DatabaseEvolutionTesting {
       commandParser(baseDirectory.value / "conf/evolutions")
    }
   
+  sealed trait OldCommand
+  case class UpCommand(number: String) extends OldCommand
+  case class DownCommand(number: String) extends OldCommand
+  
+  def availableScripts(dir: File): Set[String] = {
+   val scripts = IO.listFiles(dir, "*.sql")
+   val scriptNumbers =
+      for {
+        script <- scripts
+        filename = script.getName
+        if filename matches "\\d+\\.sql"
+     } yield filename.dropRight(4)
+    scriptNumbers.toSet
+}
+  
+  
+  val oldParser: Initialize[Parser[OldCommand]] = Def.setting {
+    
+    val evolutionsDirectory =
+      baseDirectory.value / "conf/evolutions"
+      
+    val examples =
+      availableScripts(evolutionsDirectory)
+
+    val migrationNumber: Parser[String] =  
+      token(Digit.+ map (_.mkString), "<Migration Script Number>").examples(examples, true)
+    
+    
+    val upCommand = literal("up") ~> Space ~> migrationNumber map UpCommand.apply
+    val downCommand = literal("down") ~> Space ~> migrationNumber map DownCommand.apply
+    
+    Space ~> (upCommand | downCommand)
+  }
+  
   def scriptNameParser(baseDirectory: File): Parser[File] = {
     // TODO - Make sure all script names are numbered...
     
