@@ -31,7 +31,8 @@ lazy val common = (
       val content = "version=%s" format (gitHeadCommitSha.value)
       IO.write(propFile, content)
       Seq(propFile)
-    }
+    },
+    resourceGenerators in Compile <+= makeVersionProperties
   )
 )
 
