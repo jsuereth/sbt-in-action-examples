@@ -1,0 +1,26 @@
+[info] Loading project definition from C:\code\sbt\sbt-in-action-examples\chapter6\project
+[info] Set current project to preowned-kittens (in build file:/C:/code/sbt/sbt-in-action-examples/chapter6/)
+> unpackJars
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$4.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$5.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$6$$anonfun$apply$3.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$6.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$7.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$8.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$kittens$1.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$selected$1$$anonfun$apply$1.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$selected$1$$anonfun$apply$2.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$$anonfun$selected$1.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application$.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Application.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\application.conf
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Global$.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Global.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Routes$$anonfun$1.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Routes$$anonfun$2.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Routes$$anonfun$3.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Routes$.class
+C:\code\sbt\sbt-in-action-examples\chapter6\target\scala-2.10\classes\Routes.class
+20 File(s) copied
+[success] Total time: 0 s, completed 21-Jul-2013 10:43:04
+> exit
