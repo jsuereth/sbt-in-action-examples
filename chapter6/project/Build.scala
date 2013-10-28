@@ -1,6 +1,24 @@
 import sbt._
 import Keys._
 
+class StartStop {
+  var _process: Option[Process] = None
+  println("ss")
+
+  def start(process: Process): Process = {
+    println("start")
+    _process = Some(process)
+    process
+  }
+  def stop(): Unit = {
+    println("stop")
+    _process match {
+      case Some(x) => x.destroy()
+      case None =>
+    }
+  }
+}
+
 object KittenBuild extends Build {
   lazy val root =
     Project("root", file("."))

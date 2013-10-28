@@ -85,7 +85,7 @@ unpackJars in ThisBuild := {Build.data((dependencyClasspath in Runtime).value).m
 
 def unpack(target: File, f: File) = {
   if (f.isDirectory) {println("f=" + f); sbt.IO.copyDirectory(f, target) }
-  else sbt.IO.unzip(f, target, filter = new NameFilter { def accept(name: String) = !name.toLowerCase().startsWith("meta-inf") && !name.toLowerCase().startsWith("license") && !new File(name).exists })
+  else sbt.IO.unzip(f, target, filter = new NameFilter { def accept(name: String) = { !name.toLowerCase().startsWith("meta-inf") && !name.toLowerCase().startsWith("license") && !new File(target.getAbsolutePath + "/" + name).exists  }})
 }
 
 val createUberJar = taskKey[File]("create jar which we will run")
@@ -95,6 +95,7 @@ createUberJar in ThisBuild := {
   val log = streams.value.log
   val uberJar = target.value / "build.jar"
   create (log, dependentJarDirectory.value, uberJar)
+  uberJar
 }
 
 def create(log: Logger, dir: File, buildJar: File) = {
@@ -128,15 +129,32 @@ taskC := { Thread.sleep(5000);  "taskC" }
 
 val runUberJar = taskKey[Int]("run the uber jar")
 
-runUberJar in ThisBuild := {
+runUberJar := {
+  println("runUberJar")
   val uberJar = createUberJar.value
-  val options = ForkOptions(bootJars = Seq(uberJar))
-  val arguments = Seq()
-  val mainClass = "foo.NewGlobal"
-  val exitCode: Int = Fork.java(options, mainClass +: arguments)
-  exitCode
+  streams.value.log.error("uberJar.getAbsolutePath=" + uberJar)
+  //val p  = (runUberJarProcess in ThisBuild).value.start(Fork.java.fork(ForkOptions(bootJars = Seq(uberJar)), Seq("global.Global")))
+  val f = baseDirectory.value / "src/main/resources"
+  println("f=" + f.getAbsolutePath)
+  //val outputStrategy = Some(LoggedOutput(DefaultLogger))
+  val p  = Fork.java.fork(ForkOptions(bootJars = Seq(uberJar), outputStrategy = Some(StdoutOutput), workingDirectory=Some(f)), Seq("global.Global"))
+  println("runUberJar end")
+  p
+  0
 }
 
-(test in IntegrationTest) <<= (test in IntegrationTest) dependsOn (test in Test)
+// settings are immutable, we need a setting which contains a start/stop
+// and then we just call that.
+val runUberJarProcess = settingKey[StartStop]("yes")
 
-(test in IntegrationTest) <<= (test in IntegrationTest) dependsOn (runUberJar in ThisBuild)
+(runUberJarProcess in ThisBuild) := new StartStop
+
+val xx = Def.task {
+  val ignoredResults = (test in Test).value
+  val process = runUberJar.value
+  ((test in IntegrationTest) andFinally {(runUberJarProcess in ThisBuild).value.stop()})
+}
+
+(test in IntegrationTest) := {
+  val ignored = xx.value
+}

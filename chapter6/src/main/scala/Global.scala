@@ -62,3 +62,9 @@ object Application extends Controller {
   }
 }
 
+
+object Global extends App with GlobalSettings {
+  new play.core.server.NettyServer(new StaticApplication(new File(".")), 9000)
+  override def onRouteRequest(request: RequestHeader) = Routes.onRouteRequest(request)
+  override def onHandlerNotFound(request: RequestHeader) = Routes.onHandlerNotFound(request)
+}
