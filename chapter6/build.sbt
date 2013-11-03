@@ -66,95 +66,35 @@ val gitHeadCommitSha = taskKey[String]("Determines the current git commit SHA")
 
 gitHeadCommitSha := Process("git rev-parse HEAD").lines.head
 
-// For packaging
 val dependentJarDirectory = settingKey[File]("location of the unpacked dependent jars")
 
 dependentJarDirectory := target.value / "dependent-jars"
 
 val createDependentJarDirectory = taskKey[Unit]("create the dependent-jars directory")
 
-createDependentJarDirectory in ThisBuild := {sbt.IO.createDirectory(dependentJarDirectory.value)}
+createDependentJarDirectory := {sbt.IO.createDirectory(dependentJarDirectory.value)}
 
-val createDependentJarDirectory2 = taskKey[Unit]("create the dependent-jars directory")
-
-createDependentJarDirectory2 in ThisBuild := Process("echo mkdir " + dependentJarDirectory.value + " > /temp/foobar")
+def unpack(target: File, f: File) = {
+  val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
+  if (!f.isDirectory) sbt.IO.unzip(f, target, filter = new NameFilter { def accept(name: String) = { !excludes.exists(x => name.toLowerCase().startsWith(x)) && !file(target.getAbsolutePath + "/" + name).exists}})
+}
 
 val unpackJars = taskKey[Seq[_]]("unpacks a dependent jars into target/dependent-jars")
 
-unpackJars in ThisBuild := {Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dependentJarDirectory.value, f))}
-
-def unpack(target: File, f: File) = {
-  if (f.isDirectory) {println("f=" + f); sbt.IO.copyDirectory(f, target) }
-  else sbt.IO.unzip(f, target, filter = new NameFilter { def accept(name: String) = { !name.toLowerCase().startsWith("meta-inf") && !name.toLowerCase().startsWith("license") && !new File(target.getAbsolutePath + "/" + name).exists  }})
-}
+unpackJars := {Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dependentJarDirectory.value, f))}
 
 val createUberJar = taskKey[File]("create jar which we will run")
 
-createUberJar in ThisBuild := {
-  val unpack: Seq[_] = unpackJars.value
-  val log = streams.value.log
-  val uberJar = target.value / "build.jar"
-  create (log, dependentJarDirectory.value, uberJar)
-  uberJar
+createUberJar := {
+  create (dependentJarDirectory.value, (classDirectory in Compile).value, target.value / "build.jar");
+  target.value / "build.jar"
 }
 
-def create(log: Logger, dir: File, buildJar: File) = {
-  val files = (dir ** "*").get.filter(_ != dir)
-  val filesWithPath = files.map(x => (x, x.relativeTo(dir).get.getPath))
-  filesWithPath.foreach(fp => log.debug("copying " + fp._1 + " zip(" + fp._2 + ")"))
-  sbt.IO.zip(filesWithPath, buildJar)
-  buildJar
+def create(depDir: File, binDir: File, buildJar: File) = {
+  def getFiles(dir: File) = {
+    val files = (dir ** "*").get.filter(d => d != dir)
+    files.map(x => (x, x.relativeTo(dir).get.getPath))
+  }
+  sbt.IO.zip(getFiles(binDir) ++ getFiles(depDir), buildJar)
 }
 
-val deleteDependentJarsDirectory = taskKey[Unit]("delete the dependent jars directory")
-
-deleteDependentJarsDirectory in ThisBuild := { sbt.IO.delete(dependentJarDirectory.value) }
-
-// tasks to experiment with dependencies
-
-val taskA = taskKey[String]("taskA")
-
-val taskB = taskKey[String]("taskB")
-
-val taskC = taskKey[String]("taskC")
-
-taskA := { val b = taskB.value; val c = taskC.value; "taskA" }
-
-taskB := { val c = taskC.value; Thread.sleep(5000); "taskB" }
-
-taskC := { Thread.sleep(5000);  "taskC" }
-
-
-// tasks to run the jar
-
-val runUberJar = taskKey[Int]("run the uber jar")
-
-runUberJar := {
-  println("runUberJar")
-  val uberJar = createUberJar.value
-  streams.value.log.error("uberJar.getAbsolutePath=" + uberJar)
-  //val p  = (runUberJarProcess in ThisBuild).value.start(Fork.java.fork(ForkOptions(bootJars = Seq(uberJar)), Seq("global.Global")))
-  val f = baseDirectory.value / "src/main/resources"
-  println("f=" + f.getAbsolutePath)
-  //val outputStrategy = Some(LoggedOutput(DefaultLogger))
-  val p  = Fork.java.fork(ForkOptions(bootJars = Seq(uberJar), outputStrategy = Some(StdoutOutput), workingDirectory=Some(f)), Seq("global.Global"))
-  println("runUberJar end")
-  p
-  0
-}
-
-// settings are immutable, we need a setting which contains a start/stop
-// and then we just call that.
-val runUberJarProcess = settingKey[StartStop]("yes")
-
-(runUberJarProcess in ThisBuild) := new StartStop
-
-val xx = Def.task {
-  val ignoredResults = (test in Test).value
-  val process = runUberJar.value
-  ((test in IntegrationTest) andFinally {(runUberJarProcess in ThisBuild).value.stop()})
-}
-
-(test in IntegrationTest) := {
-  val ignored = xx.value
-}
