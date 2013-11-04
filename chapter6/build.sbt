@@ -52,7 +52,7 @@ testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
 fork in IntegrationTest := true
 
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M6-SNAP8" % "it"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "it"
 
 libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % "it"
 
@@ -70,9 +70,12 @@ val dependentJarDirectory = settingKey[File]("location of the unpacked dependent
 
 dependentJarDirectory := target.value / "dependent-jars"
 
-val createDependentJarDirectory = taskKey[Unit]("create the dependent-jars directory")
+val createDependentJarDirectory = taskKey[File]("create the dependent-jars directory")
 
-createDependentJarDirectory := {sbt.IO.createDirectory(dependentJarDirectory.value)}
+createDependentJarDirectory := {
+  sbt.IO.createDirectory(dependentJarDirectory.value)
+  dependentJarDirectory.value
+}
 
 def unpack(target: File, f: File) = {
   val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
@@ -81,20 +84,37 @@ def unpack(target: File, f: File) = {
 
 val unpackJars = taskKey[Seq[_]]("unpacks a dependent jars into target/dependent-jars")
 
-unpackJars := {Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dependentJarDirectory.value, f))}
+unpackJars := {
+  val dir = createDependentJarDirectory.value
+  Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dir, f))
+}
 
 val createUberJar = taskKey[File]("create jar which we will run")
 
 createUberJar := {
+  val ignored = unpackJars.value
   create (dependentJarDirectory.value, (classDirectory in Compile).value, target.value / "build.jar");
   target.value / "build.jar"
 }
 
 def create(depDir: File, binDir: File, buildJar: File) = {
-  def getFiles(dir: File) = {
-    val files = (dir ** "*").get.filter(d => d != dir)
-    files.map(x => (x, x.relativeTo(dir).get.getPath))
+  def files(dir: File) = {
+    val fs = (dir ** "*").get.filter(d => d != dir)
+    fs.map(x => (x, x.relativeTo(dir).get.getPath))
   }
-  sbt.IO.zip(getFiles(binDir) ++ getFiles(depDir), buildJar)
+  sbt.IO.zip(files(binDir) ++ files(depDir), buildJar)
 }
 
+val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
+
+uberJarRunner := new MyUberJarRunner(createUberJar.value)
+
+(test in IntegrationTest) := {
+  val x = (test in Test).value
+  val y = createUberJar.value
+  (test in IntegrationTest).value
+}
+
+testOptions in IntegrationTest += Tests.Setup { () => uberJarRunner.value.start() }
+
+testOptions in IntegrationTest += Tests.Cleanup { _ => uberJarRunner.value.stop() }
