@@ -52,7 +52,7 @@ testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
 fork in IntegrationTest := true
 
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M6-SNAP8" % "it"
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "it"
 
 libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % "it"
 
