@@ -77,16 +77,26 @@ createDependentJarDirectory := {
   dependentJarDirectory.value
 }
 
-def unpack(target: File, f: File) = {
-  val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
-  if (!f.isDirectory) sbt.IO.unzip(f, target, filter = new NameFilter { def accept(name: String) = { !excludes.exists(x => name.toLowerCase().startsWith(x)) && !file(target.getAbsolutePath + "/" + name).exists}})
+val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
+
+def unpackFilter(target: File) = new NameFilter {
+  def accept(name: String) = {
+    !excludes.exists(x => name.toLowerCase().startsWith(x)) &&
+      !file(target.getAbsolutePath + "/" + name).exists
+  }
+}
+
+def unpack(target: File, f: File, log: Logger) = {
+  log.debug("unpacking " + f.getName)
+  if (!f.isDirectory) sbt.IO.unzip(f, target, unpackFilter(target))
 }
 
 val unpackJars = taskKey[Seq[_]]("unpacks a dependent jars into target/dependent-jars")
 
 unpackJars := {
   val dir = createDependentJarDirectory.value
-  Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dir, f))
+  val log = streams.value.log
+  Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dir, f, log))
 }
 
 val createUberJar = taskKey[File]("create jar which we will run")
