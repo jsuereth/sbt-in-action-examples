@@ -11,7 +11,6 @@ git.baseVersion := "0.1"
 val checkNoLocalChanges = taskKey[Unit]("checks to see if we have local git changes.  Fails if we do.")
 
 checkNoLocalChanges := {
-  // TODO - implement.
   val dir = baseDirectory.value
   val changes = Process("git diff-index --name-only HEAD --", dir) !! streams.value.log
   if(!changes.isEmpty) {
@@ -35,6 +34,7 @@ def releaseParser(state: State): Parser[String] = {
 }
 
 def releaseAction(state: State, version: String): State = {
+    "checkNoLocalChanges" ::
     ("all test integrationTests" ::
     s"git tag ${version}" ::
     "reload" ::
@@ -42,13 +42,18 @@ def releaseAction(state: State, version: String): State = {
     state)
 }
 
-val releaseHelp = Help("release",
-  "release <version>" -> "Runs the release script for a given version number",
-  """|Runs our release script.  This will:
-     |1. Run all the tests.
-     |2. Tag the git repo with the version number.
-     |3. Reload the build with the new version number from the git tag
-     |4. publish all the artifacts""".stripMargin
+val releaseHelp = Help(
+  Seq(
+    "release" -> "Runs the release script for a given version number"
+  ),
+  Map(
+    "release" ->
+       """|Runs our release script.  This will:
+          |1. Run all the tests.
+          |2. Tag the git repo with the version number.
+          |3. Reload the build with the new version number from the git tag
+          |4. publish all the artifacts""".stripMargin
+  )
 )
 
 val releaseCommand = Command("release", releaseHelp)(releaseParser)(releaseAction)
