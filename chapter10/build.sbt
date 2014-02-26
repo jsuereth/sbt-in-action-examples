@@ -60,3 +60,7 @@ val releaseCommand = Command("release", releaseHelp)(releaseParser)(releaseActio
 
 
 commands += releaseCommand
+
+libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
+
+libraryDependencies += "junit" % "junit" % "4.5"
