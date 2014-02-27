@@ -35,6 +35,7 @@ def releaseParser(state: State): Parser[String] = {
 
 def releaseAction(state: State, version: String): State = {
     "checkNoLocalChanges" ::
+    "clean" ::
     ("all test integrationTests" ::
     s"git tag ${version}" ::
     "reload" ::
