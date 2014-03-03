@@ -1,0 +1,17 @@
+-@ var title: String = "Selected Kittens"
+- import org.preownedkittens.database._
+- import play.api.data._
+-@ val kittens: List[(Kitten, Double)]
+
+%h1
+  =kittens.size()
+  kitten(s)
+
+%ul
+  -for(kt <- kittens)
+    %form{:action => "/purchase", :method => "POST"}
+      %li
+        = kt._1.name
+        %input{:type => "hidden", :name => "id", :value => {kt._1.id}}
+        %input#purchase{:type => "submit", :value => "Purchase"}
+
