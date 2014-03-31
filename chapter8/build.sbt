@@ -136,7 +136,7 @@ seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 val scalastyleReport = taskKey[File]("creates a report from Scalastyle")
 
 scalastyleReport := {
-  val ignored = org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
+  val result = org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
   val file = ScalastyleReport.report(target.value / "html-test-report",
                     "scalastyle-report.html",
                     baseDirectory.value / "project/scalastyle-report.html",

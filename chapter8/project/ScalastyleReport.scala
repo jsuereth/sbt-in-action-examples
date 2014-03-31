@@ -11,10 +11,12 @@ object ScalastyleReport {
   case class ScalastyleError(name: String, line: String, level: String, message: String)
 
   def report(outputDir: File, outputFile: String, templateFile: File, reportXml: File): File = {
+    // get text contents of an attribute
     def attr(node: Node, name: String) = (node \\ ("@" + name)).text
 
     val xml = XML.loadFile(reportXml)
 
+    // get scalastyle errors from XML
     val errors = asJavaCollection((xml \\ "checkstyle" \\ "file").map(f => {
       val name = attr(f, "name")
       (f \\ "error").map { e =>
@@ -27,15 +29,15 @@ object ScalastyleReport {
 
     sbt.IO.createDirectory(outputDir)
 
-    val objects = new HashMap[String, Any]()
-    objects.put("results", errors)
+    val context = new HashMap[String, Any]()
+    context.put("results", errors)
 
     val sw = new StringWriter()
     val template = sbt.IO.read(templateFile)
-    Velocity.evaluate(new VelocityContext(objects), sw, "velocity", template)
+    Velocity.evaluate(new VelocityContext(context), sw, "velocity", template)
 
-    val file = new File(outputDir, outputFile)
-    sbt.IO.write(file, sw.toString())
-    file
+    val reportFile = new File(outputDir, outputFile)
+    sbt.IO.write(reportFile, sw.toString())
+    reportFile
   }
 }
