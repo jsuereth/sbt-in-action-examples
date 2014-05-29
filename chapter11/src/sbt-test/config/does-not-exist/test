@@ -1,0 +1,3 @@
+# test that a missing config file causes error
+> clean
+-> scalastyle
