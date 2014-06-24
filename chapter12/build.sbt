@@ -9,7 +9,7 @@ val makeVersionProperties = taskKey[Seq[File]]("Creates a version.properties fil
 
 // Common settings/definitions for the build
 
-def PreownedKittenProject(name: String): Project = (
+def preownedKittenProject(name: String): Project = (
   Project(name, file(name))
   settings(
     version := "1.0",
@@ -24,7 +24,7 @@ gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head
 // Projects in this build
 
 lazy val common = (
-  PreownedKittenProject("common")
+  preownedKittenProject("common")
   settings(
     makeVersionProperties := {
       val propFile = (resourceManaged in Compile).value / "version.properties"
@@ -37,13 +37,13 @@ lazy val common = (
 )
 
 val analytics = (
-  PreownedKittenProject("analytics")
+  preownedKittenProject("analytics")
   dependsOn(common)
   settings()
 )
 
 val website = (
-  PreownedKittenProject("website")
+  preownedKittenProject("website")
   dependsOn(common)
   settings()
 )
