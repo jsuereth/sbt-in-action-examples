@@ -3,3 +3,4 @@ resolvers += "typesafe-release" at "http://typesafe.artifactoryonline.com/typesa
 libraryDependencies <+= (sbtVersion) { sv =>
   "org.scala-sbt" % "scripted-plugin" % sv
 }
+
