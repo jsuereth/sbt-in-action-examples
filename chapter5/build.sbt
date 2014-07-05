@@ -54,6 +54,6 @@ val analytics = (
 
 val website = (
   PreownedKittenProject("website")
-  dependsOn(common)
+  dependsOn(common, analytics)
   settings()
 )

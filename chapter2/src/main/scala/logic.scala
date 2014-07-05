@@ -1,3 +1,5 @@
+package org.preownedkittens
+
 object Logic {
   /** Determines the match likelihood and returns % match. */
   def matchLikelihood(kitten: Kitten, buyer: BuyerPreferences): Double = {
