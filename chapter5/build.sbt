@@ -1,64 +1,59 @@
 name := "preowned-kittens"
 
-version := "1.0"
 
-// These are dependencies for Play
+name := "preowned-kittens"
 
-libraryDependencies ++= Seq(
-  "play" %% "play" % "2.1.1",
-  "eu.teamon" %% "play-navigator" % "0.4.0",
-  "org.webjars" % "jquery" % "1.9.1",
-  "play" %% "anorm" % "2.1.1",
-  "play" %% "play-jdbc" % "2.1.1",
-  "org.fusesource.scalate" %% "scalate-core" % "1.6.1"
+// Custom keys for this build.
+
+val gitHeadCommitSha = taskKey[String]("Determines the current git commit SHA")
+
+val makeVersionProperties = taskKey[Seq[File]]("Creates a version.properties file we can find at runtime.")
+
+
+// Common settings/definitions for the build
+
+def PreownedKittenProject(name: String): Project = (
+  Project(name, file(name))
+  .settings( Defaults.itSettings : _*)
+  .settings(
+    version := "1.0",
+    organization := "com.preownedkittens",
+    libraryDependencies += "org.specs2" % "specs2_2.10" % "1.14" % "test",
+    javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6"),
+    resolvers ++= Seq(
+      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+      "teamon.eu Repo" at "http://repo.teamon.eu/"
+    )
+  )
+  .configs(IntegrationTest)
 )
 
-resolvers ++= Seq(
-  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-  "teamon.eu Repo" at "http://repo.teamon.eu/"
+gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head
+
+
+// Projects in this build
+
+lazy val common = (
+  PreownedKittenProject("common")
+  settings(
+    makeVersionProperties := {
+      val propFile = (resourceManaged in Compile).value / "version.properties"
+      val content = "version=%s" format (gitHeadCommitSha.value)
+      IO.write(propFile, content)
+      Seq(propFile)
+    },
+    resourceGenerators in Compile <+= makeVersionProperties
+  )
 )
 
-// specs2
+val analytics = (
+  PreownedKittenProject("analytics")
+  dependsOn(common)
+  settings()
+)
 
-libraryDependencies += "org.specs2" %% "specs2" % "1.14" % "test"
-
-libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "test"
-                            
-testOptions += Tests.Argument(TestFrameworks.Specs2, "html")
-
-javaOptions in Test += "-Dspecs2.outDir=" + (target.value / "generated/test-reports").getAbsolutePath
-
-fork in Test := true
-
-// junit
-
-libraryDependencies += "junit" % "junit" % "4.11" % "test"
-
-libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
-
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.preownedkittens.sbt.JUnitListener")
-
-javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
-
-javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6")
-
-// scalacheck
-
-libraryDependencies += "org.scalacheck" % "scalacheck_2.10.0" % "1.10.0" % "test"
-                            
-testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
-
-// scalatest
-
-fork in IntegrationTest := true
-
-libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0" % "it"
-
-libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % "it"
-
-libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "it"
-
-javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources/chromedriver.exe").getAbsolutePath
-
-testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
-
+val website = (
+  PreownedKittenProject("website")
+  dependsOn(common)
+  settings()
+)
