@@ -1,4 +1,4 @@
-package org.preownedkittens.database;
+package org.preownedkittens.database
 
 import anorm._
 import anorm.SqlParser._
@@ -13,7 +13,7 @@ case class KittenAttribute(id: Long, kittenId: Long, attributeId: Long)
 object Kitten {
   val kitten = {
     get[Long]("id") ~ 
-    get[String]("name") map { 
+    get[String]("name") map {
       case id~name => Kitten(id, name)
     }
   }
