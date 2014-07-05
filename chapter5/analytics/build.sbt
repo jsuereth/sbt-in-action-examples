@@ -15,3 +15,13 @@ fork in Test := true
 libraryDependencies += "org.scalacheck" % "scalacheck_2.10.0" % "1.10.0" % "test"
                             
 testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
+
+// junit
+
+libraryDependencies += "junit" % "junit" % "4.11" % "test"
+
+libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
+
+testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.preownedkittens.sbt.JUnitListener")
+
+javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
