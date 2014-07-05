@@ -16,6 +16,13 @@ object DatabaseEvolutionTesting {
   case class TestDown(script: File) extends Command {
     override def toString = s"DOWNS - ${script.getAbsolutePath}"
   }
+
+  val evolutionsDirectory = settingKey[File]("location of evolutions scripts.")
+
+  val evolutionsDirectoryDefaultSetting: Setting[_] = 
+    evolutionsDirectory := {
+      (resourceDirectory in Compile).value / "evolutions/default" 
+    }
   
   val parser: Initialize[Parser[Command]] =
     Def.setting { 
@@ -39,12 +46,9 @@ object DatabaseEvolutionTesting {
   
   
   val oldParser: Initialize[Parser[OldCommand]] = Def.setting {
-    
-    val evolutionsDirectory =
-      baseDirectory.value / "conf/evolutions"
       
     val examples =
-      availableScripts(evolutionsDirectory)
+      availableScripts(evolutionsDirectory.value)
 
     val migrationNumber: Parser[String] =  
       token(Digit.+ map (_.mkString), "<Migration Script Number>").examples(examples, true)
