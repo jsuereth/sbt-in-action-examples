@@ -1,5 +1,3 @@
-package global
-
 import java.io.File
 
 import controllers.Assets
@@ -60,8 +58,8 @@ object Application extends Controller {
 
     Ok(Scalate("app/views/selected.scaml").render('title -> "Selected kittens", 'kittens -> kittensWithLikelihood))
   }
-}
 
+}
 
 object Global extends App with GlobalSettings {
   new play.core.server.NettyServer(new StaticApplication(new File(".")), 9000)
