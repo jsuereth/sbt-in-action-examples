@@ -90,11 +90,6 @@ val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
 
 uberJarRunner := new MyUberJarRunner(createUberJar.value)
 
-(test in IntegrationTest) := {
-  val x = (test in Test).value
-  (test in IntegrationTest).value
-}
-
 testOptions in IntegrationTest += Tests.Setup { () => uberJarRunner.value.start() }
 
 testOptions in IntegrationTest += Tests.Cleanup { _ => uberJarRunner.value.stop() }
