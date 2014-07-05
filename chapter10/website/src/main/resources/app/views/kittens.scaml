@@ -1,0 +1,32 @@
+-@ var title: String = "Kitten list"
+- import org.preownedkittens.database._
+- import play.api.data._
+-@ val kittens: List[Kitten]
+-@ val attributes: List[Attribute]
+
+%h1
+  =kittens.size()
+  kitten(s)
+
+%ul
+  = collection(kittens, "list")
+
+%h2
+  Please find me a kitten!
+
+%form{:action => "/selected", :method => "POST"}
+  %table
+    %tr
+      %td Attribute 1
+      %td
+        = render("select_attribute.scaml", Map("name" -> "select1", "it" -> attributes))
+    %tr
+      %td Attribute 2
+      %td
+        = render("select_attribute.scaml", Map("name" -> "select2", "it" -> attributes))
+    %tr
+      %td Attribute 3
+      %td
+        = render("select_attribute.scaml", Map("name" -> "select3", "it" -> attributes))
+
+  %input#findKitten{:type => "submit", :value => "Find me a kitten"}    
