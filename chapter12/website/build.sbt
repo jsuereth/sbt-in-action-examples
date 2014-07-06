@@ -38,6 +38,18 @@ testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "h
 
 com.github.retronym.SbtOneJar.oneJarSettings
 
+lazy val oneJarArtifact = Def.setting {
+  artifact.value.copy(classifier = Some("onejar"))
+}
+
+artifacts += oneJarArtifact.value
+
+packagedArtifacts += oneJarArtifact.value -> oneJar.value
+
+// -------------------
+// Integration testing
+// -------------------
+
 val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
 
 uberJarRunner := new MyUberJarRunner(oneJar.value)

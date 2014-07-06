@@ -41,4 +41,16 @@ javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit
 
 mainClass := Some("org.preownedkittens.Analytics")
 
-packageArchetype.java_application
+packageArchetype.java_server
+
+bashScriptExtraDefines += """addJava "-Danalytics.properties=${app_home}/../conf/analytics.properties""""
+
+batScriptExtraDefines += """set _JAVA_OPTS=%_JAVA_OPTS% -Danalytics.properties=%ANALYTICS_HOME%\\conf\\analytics.properties"""
+
+maintainer := "Josh Suereth <pet-them-all@preowned-kittens.com>"
+
+packageSummary := "Analytics server for prewoned-kittens.com"
+
+packageDescription := """Contains the analytics of kitten-owner compatibilities."""
+
+debianPackageDependencies in Debian ++= Seq("java7-runtime-headless", "bash")
