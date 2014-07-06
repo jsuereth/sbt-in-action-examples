@@ -1,0 +1,15 @@
+-@ var body: String = "foobar"
+-@ val title: String
+-@ var contextPath: String = ""
+
+!!! Strict
+%html(xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en")
+  %head
+    %meta{"http-equiv" => "Content-Type", :content => "text/html", :charset => "UTF-8"}
+    %link{"href" => {contextPath+"/images/favicon.ico"}, :rel => "shortcut icon"}
+    %title =title
+%body
+  %div#contentwrap{:style => "padding-left: 5px"}
+    %h1 =title
+
+    -unescape(body)
