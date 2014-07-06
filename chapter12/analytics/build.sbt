@@ -1,3 +1,10 @@
+import com.typesafe.sbt.SbtNativePackager._
+import NativePackagerKeys._
+
+//--------
+// Testing
+//--------
+
 // specs2 libraries.
 
 libraryDependencies += "org.specs2" %% "specs2" % "1.14" % "test"
@@ -26,3 +33,12 @@ libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.preownedkittens.sbt.JUnitListener")
 
 javaOptions in Test += "-Djunit.output.file=" + (target.value / "generated/junit.html").getAbsolutePath
+
+
+//-----------
+// Packaging
+//-----------
+
+mainClass := Some("org.preownedkittens.Analytics")
+
+packageArchetype.java_application
