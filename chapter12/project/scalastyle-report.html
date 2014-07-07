@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=" UTF-8"" />
+<title>Scalastyle Results</title>
+<style type="text/css">
+body {
+ margin: 0px;
+ padding: 0px 0px 10px 0px;
+ font-family: Verdana, Helvetica, Arial, sans-serif;
+ font-size: 13px;
+ padding: 4px;
+}
+
+table {
+   border: 0;
+}
+
+th {
+ background-color: #bbb;
+ text-align: left;
+ font-weight: bold;
+}
+
+tr {
+ background-color: #eee;
+}
+</style>
+</head>
+<body>
+ <h2>Scalastyle Results</h2>
+ <table>
+  <tr>
+   <th>Name</th>
+   <th>Level</th>
+   <th>Message</th>
+   <th>Line</th>
+  </tr>
+  #foreach( ${error} in ${results} )
+  <tr>
+   <td>${error.name()}</td>
+   <td>${error.level()}</td>
+   <td>${error.message()}</td>
+   <td>${error.line()}</td>
+  </tr>
+  #end
+ </table>
+</body>
+</html>
