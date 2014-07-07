@@ -1,7 +1,0 @@
-200:play.api.db.BoneCPPlugin
-500:play.api.db.evolutions.EvolutionsPlugin
-100:play.api.i18n.MessagesPlugin
-600:play.api.cache.EhCachePlugin
-1000:play.api.libs.concurrent.AkkaPlugin
-10000:play.api.GlobalPlugin
-

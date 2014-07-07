@@ -1,43 +1,57 @@
 name := "preowned-kittens"
 
-libraryDependencies += "org.apache.derby" % "derby" % "10.10.1.1"
+// Custom keys for this build.
 
-val dbLocation = settingKey[File]("The location of the testing database.")
+val gitHeadCommitSha = taskKey[String]("Determines the current git commit SHA")
 
-dbLocation := target.value / "database"
-
-val dbHelper = taskKey[DatabaseHelper]("")
-
-dbHelper := derby((fullClasspath in Compile).value, dbLocation.value)
-
-val dbListTables = taskKey[List[String]]("")
-
-dbListTables := dbHelper.value.tables
+val makeVersionProperties = taskKey[Seq[File]]("Creates a version.properties file we can find at runtime.")
 
 
-val dbQuery = inputKey[Unit]("Runs a query against the database and prints the result")
+// Common settings/definitions for the build
 
-val queryParser = {
-  import complete.DefaultParsers._
-  token(any.* map (_.mkString), "<sql>")
-}
+def PreownedKittenProject(name: String): Project = (
+  Project(name, file(name))
+  .settings( Defaults.itSettings : _*)
+  .settings(
+    version := "1.0",
+    organization := "com.preownedkittens",
+    libraryDependencies += "org.specs2" % "specs2_2.10" % "1.14" % "test",
+    javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6"),
+    resolvers ++= Seq(
+      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+      "teamon.eu Repo" at "http://repo.teamon.eu/"
+    ),
+    exportJars := true
+  )
+  .configs(IntegrationTest)
+)
 
-dbQuery := {
-  val query = queryParser.parsed
-  val db = dbHelper.value
-  val log = streams.value.log
-  db.runQuery(query, log)
-}
-
-val dbEvolutionTest = inputKey[Unit]("Tests a database evolution")
+gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head
 
 
-dbEvolutionTest := {
-  //val cmd = DatabaseEvolutionTesting.parser.parsed
-  //val db = dbHelper.value
-  //val log = streams.value.log
-  //DatabaseEvolutionTesting.runCommand(cmd, db, log)
-  val cmd = DatabaseEvolutionTesting.oldParser.parsed
-  println(cmd)
-}
+// Projects in this build
 
+lazy val common = (
+  PreownedKittenProject("common")
+  settings(
+    makeVersionProperties := {
+      val propFile = (resourceManaged in Compile).value / "version.properties"
+      val content = "version=%s" format (gitHeadCommitSha.value)
+      IO.write(propFile, content)
+      Seq(propFile)
+    },
+    resourceGenerators in Compile <+= makeVersionProperties
+  )
+)
+
+val analytics = (
+  PreownedKittenProject("analytics")
+  dependsOn(common)
+  settings()
+)
+
+val website = (
+  PreownedKittenProject("website")
+  dependsOn(common, analytics)
+  settings()
+)

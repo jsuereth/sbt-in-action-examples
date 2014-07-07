@@ -1,67 +1,73 @@
-import com.typesafe.sbt.SbtGit._
-import complete.DefaultParsers._
-import complete.Parser
-
 name := "preowned-kittens"
 
-versionWithGit
+// Custom keys for this build.
+
+val gitHeadCommitSha = taskKey[String]("Determines the current git commit SHA")
+
+val makeVersionProperties = taskKey[Seq[File]]("Creates a version.properties file we can find at runtime.")
 
 git.baseVersion := "0.1"
 
-val checkNoLocalChanges = taskKey[Unit]("checks to see if we have local git changes.  Fails if we do.")
+val scalastyleReport = taskKey[File]("creates a report from Scalastyle")
 
-checkNoLocalChanges := {
-  val dir = baseDirectory.value
-  val changes = Process("git diff-index --name-only HEAD --", dir) !! streams.value.log
-  if(!changes.isEmpty) {
-    val changeMsg = changes.split("[\r\n]+").mkString(" - ","\n - ","\n")
-    sys.error("Git changes were found: \n" + changeMsg)
-  }
-}
+// Common settings/definitions for the build
 
-val integrationTests = taskKey[Unit]("runs integration tests.")
+def PreownedKittenProject(name: String): Project = (
+  Project(name, file(name))
+  .settings( Defaults.itSettings : _*)
+  .settings(org.scalastyle.sbt.ScalastylePlugin.Settings: _*)
+  .settings(versionWithGit:_*)
+  .settings(
+    organization := "com.preownedkittens",
+    libraryDependencies += "org.specs2" % "specs2_2.10" % "1.14" % "test",
+    javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6"),
+    resolvers ++= Seq(
+      "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+      "teamon.eu Repo" at "http://repo.teamon.eu/"
+    ),
+    exportJars := true,
+    scalastyleReport := {
+      val result = org.scalastyle.sbt.PluginKeys.scalastyle.toTask("").value
+      val file = ScalastyleReport.report(target.value / "html-test-report",
+                        "scalastyle-report.html",
+                        (baseDirectory in ThisBuild).value / "project/scalastyle-report.html",
+                        target.value / "scalastyle-result.xml")
+      println("created report " + file.getAbsolutePath)
+      file
+    },
+    org.scalastyle.sbt.PluginKeys.config := { 
+      (baseDirectory in ThisBuild).value / "scalastyle-config.xml" 
+    }
+  )
+  .configs(IntegrationTest)
+)
 
-integrationTests := streams.value.log.info("Integration tests successful")
+gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head
 
-def releaseParser(state: State): Parser[String] = {
-   val version = (Digit ~ chars(".0123456789").*) map {
-    case (first, rest) => (first +: rest).mkString
-   }
-   val complete = (chars("v") ~ token(version, "<version number>")) map {
-    case (v, num) => v + num
-   }
-   Space ~> complete  
-}
 
-def releaseAction(state: State, version: String): State = {
-    "checkNoLocalChanges" ::
-    "clean" ::
-    ("all test integrationTests" ::
-    s"git tag ${version}" ::
-    "reload" ::
-    "publish" ::
-    state)
-}
+// Projects in this build
 
-val releaseHelp = Help(
-  Seq(
-    "release" -> "Runs the release script for a given version number"
-  ),
-  Map(
-    "release" ->
-       """|Runs our release script.  This will:
-          |1. Run all the tests.
-          |2. Tag the git repo with the version number.
-          |3. Reload the build with the new version number from the git tag
-          |4. publish all the artifacts""".stripMargin
+lazy val common = (
+  PreownedKittenProject("common")
+  settings(
+    makeVersionProperties := {
+      val propFile = (resourceManaged in Compile).value / "version.properties"
+      val content = "version=%s" format (gitHeadCommitSha.value)
+      IO.write(propFile, content)
+      Seq(propFile)
+    },
+    resourceGenerators in Compile <+= makeVersionProperties
   )
 )
 
-val releaseCommand = Command("release", releaseHelp)(releaseParser)(releaseAction)
+val analytics = (
+  PreownedKittenProject("analytics")
+  dependsOn(common)
+  settings()
+)
 
-
-commands += releaseCommand
-
-libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
-
-libraryDependencies += "junit" % "junit" % "4.5"
+val website = (
+  PreownedKittenProject("website")
+  dependsOn(common, analytics)
+  settings()
+)
