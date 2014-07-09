@@ -1,3 +1,4 @@
+import AssemblyKeys._
 
 // These are dependencies for Play
 
@@ -26,69 +27,34 @@ javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.
 
 testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
-// ----------------
-// Onejar packaging
-// ----------------
+// ------------------
+// Assembly packaging
+// ------------------
 
-val dependentJarDirectory = settingKey[File]("location of the unpacked dependent jars")
+assemblySettings
 
-dependentJarDirectory := target.value / "dependent-jars"
+mainClass in assembly := Some("Global")
 
-val createDependentJarDirectory = taskKey[File]("create the dependent-jars directory")
-
-createDependentJarDirectory := {
-  sbt.IO.createDirectory(dependentJarDirectory.value)
-  dependentJarDirectory.value
-}
-
-val excludes = List("meta-inf", "license", "play.plugins", "reference.conf")
-
-def unpackFilter(target: File) = new NameFilter {
-  def accept(name: String) = {
-    !excludes.exists(x => name.toLowerCase().startsWith(x)) &&
-      !file(target.getAbsolutePath + "/" + name).exists
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "application.conf" => MergeStrategy.concat
+    case "reference.conf" => MergeStrategy.concat
+    case "META-INF/spring.tooling" => MergeStrategy.concat
+    case "overview.html" => MergeStrategy.rename
+    case x => old(x)
   }
 }
 
-def unpack(target: File, f: File, log: Logger) = {
-  log.debug("unpacking " + f.getName)
-  if (!f.isDirectory) sbt.IO.unzip(f, target, unpackFilter(target))
-}
-
-val unpackJars = taskKey[Seq[_]]("unpacks a dependent jars into target/dependent-jars")
-
-unpackJars := {
-  val dir = createDependentJarDirectory.value
-  val log = streams.value.log
-  Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dir, f, log))
-}
-
-val createUberJar = taskKey[File]("create jar which we will run")
-
-createUberJar := {
-  val ignored = unpackJars.value
-  create (dependentJarDirectory.value, (classDirectory in Compile).value, target.value / "build.jar");
-  target.value / "build.jar"
-}
-
-def create(depDir: File, binDir: File, buildJar: File) = {
-  def files(dir: File) = {
-    val fs = (dir ** "*").get.filter(d => d != dir)
-    fs.map(x => (x, x.relativeTo(dir).get.getPath))
+excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
+  cp filter { f =>
+    (f.data.getName contains "commons-logging") ||
+    (f.data.getName contains "sbt-link")
   }
-  val allFiles = (files(binDir) ++ files(depDir)).distinct
-  // grab distinct files, prevent duplicate entries (happening for some reason)
-  val distinctFiles = allFiles.map {
-    case (file, name) => name -> file
-  }.toMap.map {
-    case (name, file) => file -> name
-  }.toSeq
-  sbt.IO.zip(distinctFiles, buildJar)
 }
 
 val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
 
-uberJarRunner := new MyUberJarRunner(createUberJar.value)
+uberJarRunner := new MyUberJarRunner(assembly.value)
 
 (test in IntegrationTest) := {
   val x = (test in Test).value
@@ -98,5 +64,3 @@ uberJarRunner := new MyUberJarRunner(createUberJar.value)
 testOptions in IntegrationTest += Tests.Setup { () => uberJarRunner.value.start() }
 
 testOptions in IntegrationTest += Tests.Cleanup { _ => uberJarRunner.value.stop() }
-
-com.github.retronym.SbtOneJar.oneJarSettings
