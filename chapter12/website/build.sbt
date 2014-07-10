@@ -1,4 +1,4 @@
-
+import AssemblyKeys._
 
 // Workaround for onejar plugin not being able to use play's default main method
 // since it's not in the built jar.
@@ -32,19 +32,32 @@ javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.
 
 testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
-// ----------------
-// Onejar packaging
-// ----------------
+// ------------------
+// Assembly packaging
+// ------------------
 
-com.github.retronym.SbtOneJar.oneJarSettings
+assemblySettings
 
-lazy val oneJarArtifact = Def.setting {
-  artifact.value.copy(classifier = Some("onejar"))
+mainClass in assembly := Some("Global")
+
+mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
+  {
+    case "application.conf" => MergeStrategy.concat
+    case "reference.conf" => MergeStrategy.concat
+    case "META-INF/spring.tooling" => MergeStrategy.concat
+    case "overview.html" => MergeStrategy.rename
+    case x => old(x)
+  }
 }
 
-artifacts += oneJarArtifact.value
+excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
+  cp filter { f =>
+    (f.data.getName contains "commons-logging") ||
+    (f.data.getName contains "sbt-link")
+  }
+}
 
-packagedArtifacts += oneJarArtifact.value -> oneJar.value
+addArtifact(Artifact("website", "assembly"), assembly)
 
 // -------------------
 // Integration testing
@@ -52,7 +65,7 @@ packagedArtifacts += oneJarArtifact.value -> oneJar.value
 
 val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
 
-uberJarRunner := new MyUberJarRunner(oneJar.value)
+uberJarRunner := new MyUberJarRunner(assembly.value)
 
 testOptions in IntegrationTest += Tests.Setup { () => uberJarRunner.value.start() }
 
