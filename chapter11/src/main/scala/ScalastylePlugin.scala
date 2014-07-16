@@ -31,6 +31,7 @@ import sbt.AutoPlugin
 import sbt.PluginTrigger
 import sbt.Plugins
 import org.scalastyle._
+import sbt.Cache._
 
 object ScalastylePlugin extends sbt.AutoPlugin {
   // override def trigger: PluginTrigger = Plugins.allRequirements
@@ -47,19 +48,31 @@ object ScalastylePlugin extends sbt.AutoPlugin {
         }
       }
     },
-    scalastyleTask in Test <<= inputTask {
+    scalastyleTask in Test := inputTask {
       (argTask: TaskKey[Seq[String]]) => {
         (argTask, scalaSource in Test, scalastyleConfig in Test, incremental, target in Test, streams) map {
           (args, sourceDir, configValue, inc, targetValue, streams) => { doScalastyle(configValue, sourceDir, inc, targetValue, streams.log) }
         }
       }
-    }
+    },
+    scalastyle2 := {
+      println("hello world")
+      println("scalastyle2.previous=" + scalastyle2.previous)
+      val sourceDir = (scalaSource in Compile).value
+      val configValue = (scalastyleConfig in Compile).value
+      val inc = incremental.value
+      val targetValue = (target in Compile).value
+      val streamsValue = streams.value
+
+      doScalastylePrevious(configValue, sourceDir, inc, scalastyle2.previous, streamsValue.log)
+    } 
   )
 
   //object autoImport {
     lazy val scalastyleTask = InputKey[Unit]("scalastyle", "Runs scalastyle.")
     lazy val scalastyleConfig = SettingKey[File]("scalastyleConfig", "configuration file for scalastyle")
     lazy val incremental = SettingKey[Boolean]("incremental", "scalastyle does incremental checks")
+    lazy val scalastyle2 = taskKey[Long]("Runs scalastyle.")
   //}
 
   private def lastModified(lastRun: Long)(file: File) = file.lastModified > lastRun
@@ -73,7 +86,7 @@ object ScalastylePlugin extends sbt.AutoPlugin {
     (sourceDir ** "*.scala").get.filter(lastModified(lastRunDate))
   }
   
-  def doScalastyle(config: File, sourceDir: File, incremental: Boolean, targetDir: File, logger: Logger): Unit = {
+  def doScalastyle(config: File, sourceDir: File, incremental: Boolean, targetDir: File, logger: Logger): Long = {
     val lastRunFile = targetDir / "scalastyle.lastrun"
 
     if (config.exists) {
@@ -86,6 +99,27 @@ object ScalastylePlugin extends sbt.AutoPlugin {
       sbt.IO.write(lastRunFile, "" + new java.util.Date().getTime())
 
       logger.info(errors + " errors found")
+      new java.util.Date().getTime()
+    } else {
+      sys.error("%s does not exist".format(config))
+    }
+  }
+
+  private def changedFilesPrevious(sourceDir: File, lastRun: Option[Long]) = {
+    val lastRunDate = lastRun.getOrElse(0L);
+    (sourceDir ** "*.scala").get.filter(lastModified(lastRunDate))
+  }
+  
+  def doScalastylePrevious(config: File, sourceDir: File, incremental: Boolean, lastRun: Option[Long], logger: Logger): Long = {
+    if (config.exists) {
+      val sources = if (incremental) changedFilesPrevious(sourceDir, lastRun)
+      else List(sourceDir)
+
+      val messages = runScalastyle(config, Directory.getFiles(None, sources))
+      val errors = messages.collect{ case x: StyleError[_] => 1}.size
+
+      logger.info(errors + " errors found")
+      new java.util.Date().getTime()
     } else {
       sys.error("%s does not exist".format(config))
     }
