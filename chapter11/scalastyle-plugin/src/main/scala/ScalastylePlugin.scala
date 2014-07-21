@@ -34,10 +34,6 @@ import org.scalastyle._
 import sbt.Cache._
 
 object ScalastylePlugin extends sbt.AutoPlugin {
-  // override def trigger: PluginTrigger = Plugins.allRequirements
-
-  // import autoImport._
- 
   override def projectSettings = Seq(
     scalastyleConfig := file("scalastyle-config.xml"),
     incremental := false,
@@ -56,8 +52,6 @@ object ScalastylePlugin extends sbt.AutoPlugin {
       }
     },
     scalastyle2 := {
-      println("hello world")
-      println("scalastyle2.previous=" + scalastyle2.previous)
       val sourceDir = (scalaSource in Compile).value
       val configValue = (scalastyleConfig in Compile).value
       val inc = incremental.value
@@ -68,12 +62,10 @@ object ScalastylePlugin extends sbt.AutoPlugin {
     } 
   )
 
-  //object autoImport {
-    lazy val scalastyleTask = InputKey[Unit]("scalastyle", "Runs scalastyle.")
-    lazy val scalastyleConfig = SettingKey[File]("scalastyleConfig", "configuration file for scalastyle")
-    lazy val incremental = SettingKey[Boolean]("incremental", "scalastyle does incremental checks")
-    lazy val scalastyle2 = taskKey[Long]("Runs scalastyle.")
-  //}
+  lazy val scalastyleTask = InputKey[Unit]("scalastyle", "Runs scalastyle.")
+  lazy val scalastyleConfig = SettingKey[File]("scalastyleConfig", "configuration file for scalastyle")
+  lazy val incremental = SettingKey[Boolean]("incremental", "scalastyle does incremental checks")
+  lazy val scalastyle2 = taskKey[Long]("Runs scalastyle.")
 
   private def lastModified(lastRun: Long)(file: File) = file.lastModified > lastRun
 
