@@ -34,37 +34,37 @@ import org.scalastyle._
 import sbt.Cache._
 
 object ScalastylePlugin extends sbt.AutoPlugin {
-  override def projectSettings = Seq(
+
+  def rawScalaStyleSettings: Seq[Setting[_]] =
+    Seq(
+      scalastyle :=  {
+        val sourceDir = (scalaSource in Compile).value
+        val configValue = (scalastyleConfig in Compile).value
+        val inc = incremental.value
+        val targetValue = (target in Compile).value
+        val s = streams.value
+        doScalastyle(configValue, sourceDir, inc, targetValue, s.log) 
+      }
+    )
+  override def projectSettings = 
+    inConfig(Compile)(rawScalaStyleSettings) ++ 
+    inConfig(Test)(rawScalaStyleSettings) ++ 
+    Seq(
     scalastyleConfig := file("scalastyle-config.xml"),
     incremental := false,
-    scalastyleTask <<= inputTask {
-      (argTask: TaskKey[Seq[String]]) => {
-        (argTask, scalaSource in Compile, scalastyleConfig in Compile, incremental, target in Compile, streams) map {
-          (args, sourceDir, configValue, inc, targetValue, streams) => { doScalastyle(configValue, sourceDir, inc, targetValue, streams.log) }
-        }
-      }
-    },
-    scalastyleTask in Test := inputTask {
-      (argTask: TaskKey[Seq[String]]) => {
-        (argTask, scalaSource in Test, scalastyleConfig in Test, incremental, target in Test, streams) map {
-          (args, sourceDir, configValue, inc, targetValue, streams) => { doScalastyle(configValue, sourceDir, inc, targetValue, streams.log) }
-        }
-      }
-    },
     scalastyle2 := {
       val sourceDir = (scalaSource in Compile).value
       val configValue = (scalastyleConfig in Compile).value
       val inc = incremental.value
       val targetValue = (target in Compile).value
-      val streamsValue = streams.value
-
-      doScalastylePrevious(configValue, sourceDir, inc, scalastyle2.previous, streamsValue.log)
+      val s = streams.value
+      doScalastylePrevious(configValue, sourceDir, inc, scalastyle2.previous, s.log)
     } 
   )
 
-  lazy val scalastyleTask = InputKey[Unit]("scalastyle", "Runs scalastyle.")
-  lazy val scalastyleConfig = SettingKey[File]("scalastyleConfig", "configuration file for scalastyle")
-  lazy val incremental = SettingKey[Boolean]("incremental", "scalastyle does incremental checks")
+  lazy val scalastyle = taskKey[Unit]("Runs scalastyle.")
+  lazy val scalastyleConfig = settingKey[File]("configuration file for scalastyle")
+  lazy val incremental = settingKey[Boolean]("scalastyle does incremental checks")
   lazy val scalastyle2 = taskKey[Long]("Runs scalastyle.")
 
   private def lastModified(lastRun: Long)(file: File) = file.lastModified > lastRun

@@ -2,17 +2,15 @@ package org.preownedkittens.sbt
 
 import sbt._
 import sbt.Keys._
+import complete.DefaultParsers._
 
 object DependPlugin extends sbt.AutoPlugin {
   import autoImport._
 
   override def projectSettings = Seq(
-    extTask <<= inputTask {
-      (argTask: TaskKey[Seq[String]]) => {
-        (argTask, streams) map {
-          (args, streams) => { streams.log.info("Hello depend " + args.mkString(",")) }
-        }
-      }
+    extTask := {
+      val args: Seq[String] = spaceDelimited("<arg>").parsed
+      streams.value.log.info("Hello depend " + args.mkString(","))
     }
   )
 
