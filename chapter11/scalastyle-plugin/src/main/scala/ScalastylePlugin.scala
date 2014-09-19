@@ -15,6 +15,7 @@ import sbt.InputKey
 import sbt.Keys.scalaSource
 import sbt.Keys.streams
 import sbt.Keys.target
+import sbt.Keys.baseDirectory
 import sbt.Logger
 import sbt.Plugin
 import sbt.Project
@@ -50,22 +51,22 @@ object ScalastylePlugin extends sbt.AutoPlugin {
     inConfig(Compile)(rawScalaStyleSettings) ++ 
     inConfig(Test)(rawScalaStyleSettings) ++ 
     Seq(
-    scalastyleConfig := file("scalastyle-config.xml"),
+    scalastyleConfig := (baseDirectory.value / "scalastyle-config.xml"),
     incremental := false,
-    scalastyle2 := {
+    scalastylePrevious := {
       val sourceDir = (scalaSource in Compile).value
       val configValue = (scalastyleConfig in Compile).value
       val inc = incremental.value
       val targetValue = (target in Compile).value
       val s = streams.value
-      doScalastylePrevious(configValue, sourceDir, inc, scalastyle2.previous, s.log)
+      doScalastylePrevious(configValue, sourceDir, inc, scalastylePrevious.previous, s.log)
     } 
   )
 
   lazy val scalastyle = taskKey[Unit]("Runs scalastyle.")
   lazy val scalastyleConfig = settingKey[File]("configuration file for scalastyle")
   lazy val incremental = settingKey[Boolean]("scalastyle does incremental checks")
-  lazy val scalastyle2 = taskKey[Long]("Runs scalastyle.")
+  lazy val scalastylePrevious = taskKey[Long]("Runs scalastyle.")
 
   private def lastModified(lastRun: Long)(file: File) = file.lastModified > lastRun
 
