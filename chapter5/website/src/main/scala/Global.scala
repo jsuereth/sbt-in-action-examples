@@ -1,15 +1,9 @@
 import java.io.File
 
-import controllers.Assets
-import play.api.libs.json.Json
 import play.api.mvc.{Controller, Action, RequestHeader}
 import play.api.GlobalSettings
 import play.core.StaticApplication
-import play.navigator._
-import play.navigator.{PlayNavigator, PlayResourcesController}
-import scala.collection.mutable
-import play.api._
-import play.api.mvc._
+import play.navigator.PlayNavigator
 import play.api.data._
 import play.api.data.Forms._
 import org.preownedkittens.database._
