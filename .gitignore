@@ -3,3 +3,4 @@ logs
 *.log
 *.markdown
 .idea
+.idea_modules
