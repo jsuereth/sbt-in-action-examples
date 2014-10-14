@@ -20,7 +20,7 @@ testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
 libraryDependencies += "junit" % "junit" % "4.11" % "test"
 
-libraryDependencies += "com.novocode" % "junit-interface" % "0.10-M3" % "test"
+libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v", "-n", "--run-listener=com.preownedkittens.sbt.JUnitListener")
 
