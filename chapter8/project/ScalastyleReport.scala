@@ -5,7 +5,6 @@ import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
 import scala.collection.convert.WrapAsJava._
 import java.util.HashMap
-import java.util.Collection
 
 object ScalastyleReport {
   case class ScalastyleError(name: String, line: String, level: String, message: String)
