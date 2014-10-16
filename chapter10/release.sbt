@@ -1,4 +1,3 @@
-import com.typesafe.sbt.SbtGit._
 import complete.DefaultParsers._
 import complete.Parser
 
