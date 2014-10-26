@@ -1,5 +1,9 @@
 name := "preowned-kittens"
 
+version in ThisBuild := "1.0"
+
+organization in ThisBuild := "com.preownedkittens"
+
 // Custom keys for this build.
 
 val gitHeadCommitSha = taskKey[String]("Determines the current git commit SHA")
@@ -13,8 +17,6 @@ def PreownedKittenProject(name: String): Project = (
   Project(name, file(name))
   .settings( Defaults.itSettings : _*)
   .settings(
-    version := "1.0",
-    organization := "com.preownedkittens",
     libraryDependencies += "org.specs2" % "specs2_2.10" % "1.14" % "test",
     javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6"),
     resolvers ++= Seq(
