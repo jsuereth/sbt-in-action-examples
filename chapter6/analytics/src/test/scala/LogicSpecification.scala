@@ -3,8 +3,6 @@ package org.preownedkittens
 import org.scalacheck.Properties
 import org.scalacheck.Prop.forAll
 import org.scalacheck._
-import org.scalacheck.Gen._
-import org.scalacheck.Arbitrary._
 
 object LogicSpecification extends Properties("Logic") {
   val allAttributes = Array("Harlequin","Tortoiseshell","Siamese",

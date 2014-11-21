@@ -1,6 +1,5 @@
 package org.preownedkittens;
 
-import org.junit.Assert.*;
 import org.junit.*;
 import scala.collection.immutable.*;
 

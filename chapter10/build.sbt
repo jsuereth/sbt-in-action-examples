@@ -1,3 +1,5 @@
+import com.typesafe.sbt.SbtGit.git
+
 name := "preowned-kittens"
 
 // Custom keys for this build.
