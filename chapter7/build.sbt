@@ -17,7 +17,7 @@ def PreownedKittenProject(name: String): Project = (
   Project(name, file(name))
   .settings( Defaults.itSettings : _*)
   .settings(
-    libraryDependencies += "org.specs2" % "specs2_2.10" % "1.14" % "test",
+    libraryDependencies += "org.specs2" %% "specs2" % "1.14" % "test",
     javacOptions in Compile ++= Seq("-target", "1.6", "-source", "1.6"),
     resolvers ++= Seq(
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",

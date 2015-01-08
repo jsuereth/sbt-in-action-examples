@@ -12,7 +12,7 @@ fork in Test := true
 
 // scalacheck
 
-libraryDependencies += "org.scalacheck" % "scalacheck_2.10.0" % "1.10.0" % "test"
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.10.0" % "test"
                             
 testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-s", "500")
 
