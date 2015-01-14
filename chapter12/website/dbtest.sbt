@@ -4,11 +4,11 @@ val dbLocation = settingKey[File]("The location of the testing database.")
 
 dbLocation := target.value / "database"
 
-val dbHelper = taskKey[DatabaseHelper]("")
+val dbHelper = taskKey[DatabaseHelper]("typesafehub/reactive-platform-service")
 
 dbHelper := derby((fullClasspath in Compile).value, dbLocation.value)
 
-val dbListTables = taskKey[List[String]]("")
+val dbListTables = taskKey[List[String]]("Prints out all available tables in the database.")
 
 dbListTables := dbHelper.value.tables
 
