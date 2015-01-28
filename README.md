@@ -1,5 +1,5 @@
 # sbt in Action Example code
-This project contains the example code for sbt in Action.   The code takes the form of a serious of sbt builds for a sophisticated website called preowned-kittens.com that handles the resale of pet kittens.    The website attempts to find ideal owners by matching buyer survey questions to know statistics of happy pet owners, and behavior characteristics of the kittens.
+This project contains the example code for sbt in Action.   The code takes the form of a series of sbt builds for a sophisticated website called preowned-kittens.com that handles the resale of pet kittens.    The website attempts to find ideal owners by matching buyer survey questions to know statistics of happy pet owners, and behavior characteristics of the kittens.
 
 The project is split into directories by chapter, and then optionally by section.    The final build is located under a directory called `final` for those who wish to see/use the completed product.
 
