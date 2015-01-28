@@ -5,7 +5,7 @@ The project is split into directories by chapter, and then optionally by section
 
 While the website and analysis code itself is rather simplistic and silly, the sbt build should be self-explantory (to those who know sbt) and well documented.
 
-If you're following along in the book, feel free to run your `sbt` directly against the chapter / section directory you're currently reading, and try thing sout.
+If you're following along in the book, feel free to run your `sbt` directly against the chapter / section directory you're currently reading, and try things out.
 
 
 ## MIT License
