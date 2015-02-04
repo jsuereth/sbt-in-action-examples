@@ -12,8 +12,14 @@ object LogicSpec extends Specification {
     "be 0% when no attributes match" in {
       val tabby = Kitten(1, List("male", "tabby"))
       val prefs = BuyerPreferences(List("female", "calico"))
-      val result = Logic.matchLikelihood(tabby, prefs) 
+      val result = Logic.matchLikelihood(tabby, prefs)
       result must beLessThan(0.001)
+    }
+    "correctly handle an empty BuyerPreferences" in {
+      val tabby = Kitten(1, List("male", "tabby"))
+      val prefs = BuyerPreferences(List())
+      val result = Logic.matchLikelihood(tabby, prefs)
+      result.isNaN mustEqual false
     }
   }
 }
