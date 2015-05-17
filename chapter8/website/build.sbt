@@ -22,8 +22,9 @@ libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % 
 
 libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "it"
 
-// TODO - cross platform driver.
-javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources/chromedriver.exe").getAbsolutePath
+def chromeDriver = if (System.getProperty("os.name").startsWith("Windows")) "chromedriver.exe" else "chromedriver"
+
+javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources" / chromeDriver).getAbsolutePath
 
 testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
