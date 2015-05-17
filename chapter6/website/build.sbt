@@ -26,10 +26,6 @@ javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.
 
 testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
-// ----------------
-// Onejar packaging
-// ----------------
-
 val dependentJarDirectory = settingKey[File]("location of the unpacked dependent jars")
 
 dependentJarDirectory := target.value / "dependent-jars"
