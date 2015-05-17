@@ -9,7 +9,7 @@ class MyUberJarRunner(uberJar: File) extends UberJarRunner {
   var p: Option[Process] = None
   def start(): Unit = {
     p = Some(Fork.java.fork(ForkOptions(),
-             Seq("-cp", uberJar.getAbsolutePath, "play.core.server.NettyServer")))
+             Seq("-cp", uberJar.getAbsolutePath, "Global")))
   }
   def stop(): Unit = p foreach (_.destroy())
 }

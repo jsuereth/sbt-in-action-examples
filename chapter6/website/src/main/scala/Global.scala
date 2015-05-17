@@ -9,6 +9,7 @@ import play.api.data._
 import play.api.data.Forms._
 import org.preownedkittens.database._
 
+
 object Routes extends PlayNavigator {
   val index = GET on root to redirect("kittens")
   val kittens = GET on "kittens" to { () => Application.kittens }

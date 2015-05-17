@@ -26,6 +26,12 @@ def PreownedKittenProject(name: String): Project = (
     exportJars := true
   )
   .configs(IntegrationTest)
+  .settings(
+    (test in IntegrationTest) := {
+      val x = (test in Test).value
+      (test in IntegrationTest).value
+    }
+  )
 )
 
 gitHeadCommitSha in ThisBuild := Process("git rev-parse HEAD").lines.head

@@ -20,8 +20,9 @@ libraryDependencies += "org.seleniumhq.selenium" % "selenium-java" % "2.31.0" % 
 
 libraryDependencies += "org.pegdown" % "pegdown" % "1.0.2" % "it"
 
-// TODO - cross platform driver.
-javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources/chromedriver.exe").getAbsolutePath
+def chromeDriver = if (System.getProperty("os.name").startsWith("Windows")) "chromedriver.exe" else "chromedriver"
+
+javaOptions in IntegrationTest += "-Dwebdriver.chrome.driver=" + (baseDirectory.value / "src/it/resources" / chromeDriver).getAbsolutePath
 
 testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-h", (target.value / "html-test-report").getAbsolutePath)
 
@@ -49,33 +50,49 @@ def unpackFilter(target: File) = new NameFilter {
   }
 }
 
-def unpack(target: File, f: File, log: Logger) = {
-  log.debug("unpacking " + f.getName)
-  if (!f.isDirectory) sbt.IO.unzip(f, target, unpackFilter(target))
+def isLocal(f: File, base: File) = sbt.IO.relativize(base, f).isDefined
+
+def unpack(target: File, f: File) = {
+  if (f.isDirectory) sbt.IO.copyDirectory(f, target)
+  sbt.IO.unzip(f, target, unpackFilter(target))
 }
 
-val unpackJars = taskKey[Seq[_]]("unpacks a dependent jars into target/dependent-jars")
+def unpackJarSeq(files: Seq[File], target: File, base: File, local: Boolean) = {
+  files.filter(f => local == isLocal(f, base)).map(f => unpack(target, f))
+}
+
+val unpackJars = taskKey[Seq[_]]("unpacks dependent jars into target/dependent-jars")
 
 unpackJars := {
   val dir = createDependentJarDirectory.value
-  val log = streams.value.log
-  Build.data((dependencyClasspath in Runtime).value).map ( f => unpack(dir, f, log))
+  val bd = (baseDirectory in ThisBuild).value
+  val classpathJars = Build.data((dependencyClasspath in Runtime).value)
+
+  unpackJarSeq(classpathJars, dir, bd, false)
 }
 
 val createUberJar = taskKey[File]("create jar which we will run")
 
 createUberJar := {
   val ignored = unpackJars.value
-  create (dependentJarDirectory.value, (classDirectory in Compile).value, target.value / "build.jar");
-  target.value / "build.jar"
+  val bd = (baseDirectory in ThisBuild).value
+  val output = target.value / "build.jar"
+  val classpathJars = Build.data((dependencyClasspath in Runtime).value)
+
+  sbt.IO.withTemporaryDirectory ( td => {
+    unpackJarSeq(classpathJars, td, bd, true)
+    create (dependentJarDirectory.value, td, (baseDirectory.value / "src/main/uber"), output)
+  })
+
+  output
 }
 
-def create(depDir: File, binDir: File, buildJar: File) = {
+def create(depDir: File, localDir: File, extraDir: File, buildJar: File) = {
   def files(dir: File) = {
     val fs = (dir ** "*").get.filter(d => d != dir)
     fs.map(x => (x, x.relativeTo(dir).get.getPath))
   }
-  val allFiles = (files(binDir) ++ files(depDir)).distinct
+  val allFiles = (files(localDir) ++ files(depDir) ++ files(extraDir)).distinct
   // grab distinct files, prevent duplicate entries (happening for some reason)
   val distinctFiles = allFiles.map {
     case (file, name) => name -> file
@@ -89,13 +106,16 @@ val uberJarRunner = taskKey[UberJarRunner]("run the uber jar")
 
 uberJarRunner := new MyUberJarRunner(createUberJar.value)
 
-(test in IntegrationTest) := {
-  val x = (test in Test).value
-  (test in IntegrationTest).value
-}
-
 testOptions in IntegrationTest += Tests.Setup { () => uberJarRunner.value.start() }
 
 testOptions in IntegrationTest += Tests.Cleanup { _ => uberJarRunner.value.stop() }
 
+val runUberJar = taskKey[Int]("run the uber jar")
+
+runUberJar := {
+    val uberJar = createUberJar.value
+    val options = ForkOptions()
+    val arguments = Seq("-jar", uberJar.getAbsolutePath)
+    Fork.java(options, arguments)
+}
 
